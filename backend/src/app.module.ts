@@ -17,6 +17,7 @@ import { AuthModule } from './auth/auth.module';
 import { BetsModule } from './bets/bets.module';
 import { MatchesModule } from './matches/matches.module';
 import { PlayerCardMetadataModule } from './player-card-metadata/player-card-metadata.module';
+import { PostsModule } from './posts/posts.module';
 import { validate } from './common/config/env.validation';
 
 @Module({
@@ -59,6 +60,7 @@ import { validate } from './common/config/env.validation';
     BetsModule,
     MatchesModule,
     PlayerCardMetadataModule,
+    PostsModule,
   ],
   controllers: [],
   providers: [

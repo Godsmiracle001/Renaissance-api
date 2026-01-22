@@ -67,16 +67,22 @@ export class User extends BaseEntity {
   @Column({ name: 'last_login_at', nullable: true })
   lastLoginAt: Date;
 
-  @Column({ name: 'wallet_balance', type: 'decimal', precision: 18, scale: 8, default: 0 })
+  @Column({
+    name: 'wallet_balance',
+    type: 'decimal',
+    precision: 18,
+    scale: 8,
+    default: 0,
+  })
   walletBalance: number;
 
   @OneToMany(() => Post, (post) => post.author)
   posts: Post[];
 
-  @OneToMany(() => Comment, (comment) => comment.author)
+  @OneToMany(() => Comment, (comment) => comment.author, { cascade: true })
   comments: Comment[];
 
-  @OneToMany(() => Bet, (bet) => bet.user)
+  @OneToMany(() => Bet, (bet) => bet.user, { cascade: true })
   bets: Bet[];
 
   @OneToMany(() => Transaction, (transaction) => transaction.user)
