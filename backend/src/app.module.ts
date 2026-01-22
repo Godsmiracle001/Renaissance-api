@@ -58,7 +58,6 @@ import { validate } from './common/config/env.validation';
   ],
   controllers: [],
   providers: [
-    AppService,
     {
       provide: APP_GUARD,
       useClass: ThrottlerGuard,
