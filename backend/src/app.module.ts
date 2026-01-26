@@ -28,6 +28,8 @@ import { validate } from './common/config/env.validation';
 import { BlockchainModule } from './blockchain/blockchain.module';
 import { LeaderboardsModule } from './leaderboards/leaderboards.module';
 import { SpinModule } from './spin/spin.module';
+import { HealthModule } from './health/health.module';
+import { CacheConfigModule } from './common/cache/cache.module';
 
 
 
@@ -80,6 +82,8 @@ import { SpinModule } from './spin/spin.module';
     FreeBetVouchersModule,
     SpinModule,
     LeaderboardsModule,
+    HealthModule,
+    CacheConfigModule,
   ],
   controllers: [],
   providers: [
