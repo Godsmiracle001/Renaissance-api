@@ -27,10 +27,12 @@ import { PredictionsModule } from './predictions/predictions.module';
 import { FreeBetVouchersModule } from './free-bet-vouchers/free-bet-vouchers.module';
 import { validate } from './common/config/env.validation';
 import { BlockchainModule } from './blockchain/blockchain.module';
+import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { LeaderboardsModule } from './leaderboards/leaderboards.module';
 import { SpinModule } from './spin/spin.module';
 import { HealthModule } from './health/health.module';
 import { CacheConfigModule } from './common/cache/cache.module';
+import { AdminModule } from './admin/admin.module';
 
 import { LeaderboardModule } from './leaderboard/leaderboard.module';
 import { ReconciliationModule } from './reconciliation/reconciliation.module';
@@ -83,12 +85,14 @@ import { ReconciliationModule } from './reconciliation/reconciliation.module';
     PlayerCardMetadataModule,
     PostsModule,
     PredictionsModule,
+    LeaderboardModule,
     FreeBetVouchersModule,
     SpinModule,
     LeaderboardModule,
     LeaderboardsModule,
     HealthModule,
     CacheConfigModule,
+    AdminModule,
     ReconciliationModule,
   ],
   controllers: [],
