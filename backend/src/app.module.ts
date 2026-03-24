@@ -52,6 +52,8 @@ import { NotificationsModule } from './notifications/notifications.module';
 import { GamificationModule } from './gamification/gamification.module';
 import { Achievement } from './gamification/entities/achievement.entity';
 import { UserAchievement } from './gamification/entities/user-achievement.entity';
+import { BetSettlementModule } from './bet-settlement/bet-settlement.module';
+import { OddsModule } from './odds/odds.module';
 
 // Custom role-based guard
 import { RateLimitGuard } from './common/guards/rate-limit.guard';
@@ -104,6 +106,11 @@ import { RateLimitGuard } from './common/guards/rate-limit.guard';
     ]),
     SpinGameModule,
     RateLimitModule,
+    AuthModule,
+    MatchesModule,
+    BetsModule,
+    BetSettlementModule,
+    OddsModule,
     StakingModule,
     LeaderboardModule,
     FreeBetVouchersModule,

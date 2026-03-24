@@ -13,7 +13,11 @@ import { LeaderboardQueryService } from './leaderboard-query.service';
 import { LeaderboardAggregationService } from './leaderboard-aggregation.service';
 import { LeaderboardSyncService } from './leaderboard-sync.service';
 // import { LeaderboardGateway } from './leaderboard.gateway';
+import { BetPlacedEventHandler } from './listeners/bet-placed.listener';
+import { BetSettledEventHandler } from './listeners/bet-settled.listener';
 import { SpinSettledEventHandler } from './listeners/spin-settled.listener';
+import { StakeCreditedEventHandler } from './listeners/stake-credited.listener';
+import { StakeDebitedEventHandler } from './listeners/stake-debited.listener';
 import { SeasonService } from './services/season.service';
 import { SeasonalLeaderboardService } from './services/seasonal-leaderboard.service';
 import { SeasonResetService } from './services/season-reset.service';
@@ -35,7 +39,11 @@ import { SeasonController } from './controllers/season.controller';
   providers: [
     LeaderboardService,
     LeaderboardQueryService,
+    BetPlacedEventHandler,
+    BetSettledEventHandler,
     SpinSettledEventHandler,
+    StakeCreditedEventHandler,
+    StakeDebitedEventHandler,
     LeaderboardAggregationService,
     LeaderboardSyncService,
     // LeaderboardGateway,
