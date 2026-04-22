@@ -74,6 +74,19 @@ export class PermissionService {
         Permission.MODERATE_CONTENT,
         Permission.VIEW_AUDIT_LOGS,
       ],
+
+      [AdminRole.ANALYST]: [
+        Permission.VIEW_ANALYTICS,
+        Permission.EXPORT_DATA,
+        Permission.VIEW_USERS,
+        Permission.VIEW_TRANSACTIONS,
+      ],
+
+      [AdminRole.SUPPORT]: [
+        Permission.VIEW_USERS,
+        Permission.VIEW_USER_ACTIVITY,
+        Permission.RESET_USER_PASSWORD,
+      ],
     };
   }
 

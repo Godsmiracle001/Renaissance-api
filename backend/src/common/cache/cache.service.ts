@@ -164,7 +164,12 @@ export class CacheService implements OnModuleInit {
    */
   async clear(): Promise<void> {
     try {
-      await this.cacheManager.reset();
+      const cache = this.cacheManager as any;
+      if (typeof cache.reset === 'function') {
+        await cache.reset();
+      } else if (typeof cache.clear === 'function') {
+        await cache.clear();
+      }
       this.logger.log('Cache cleared');
     } catch (error) {
       this.logger.error('Cache clear error:', error);

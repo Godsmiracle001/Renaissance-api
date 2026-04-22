@@ -1,64 +1,70 @@
-import { Column, Entity, ManyToOne, Index } from 'typeorm';
-import { BaseEntity } from '../../common/entities/base.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
-
-export enum TransactionType {
-  BET_PLACEMENT = 'bet_placement',
-  BET_WINNING = 'bet_winning',
-  BET_CANCELLATION = 'bet_cancellation',
-  WALLET_DEPOSIT = 'wallet_deposit',
-  WALLET_WITHDRAWAL = 'wallet_withdrawal',
-  STAKING_REWARD = 'staking_reward',
-  STAKING_PENALTY = 'staking_penalty',
-}
 
 export enum TransactionStatus {
   PENDING = 'pending',
   COMPLETED = 'completed',
   FAILED = 'failed',
-  REVERSED = 'reversed',
+}
+
+export enum TransactionKind {
+  DEPOSIT = 'deposit',
+  WITHDRAWAL = 'withdrawal',
+  BET = 'bet',
+  WIN = 'win',
+}
+
+export enum TransactionType {
+  CREDIT = 'credit',
+  DEBIT = 'debit',
+  WALLET_DEPOSIT = 'wallet_deposit',
+  WALLET_WITHDRAWAL = 'wallet_withdrawal',
+  BET_PLACEMENT = 'bet_placement',
+  BET_WINNING = 'bet_winning',
+  BET_CANCELLATION = 'bet_cancellation',
+  STAKING_REWARD = 'staking_reward',
+  STAKING_PENALTY = 'staking_penalty',
 }
 
 @Entity('transactions')
-@Index(['userId'])
-@Index(['status'])
-@Index(['type'])
-@Index(['userId', 'type'])
-@Index(['userId', 'status'])
-@Index(['referenceId'])
-@Index(['relatedEntityId'])
-export class Transaction extends BaseEntity {
-  @Column({ name: 'user_id' })
+export class Transaction {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column()
   userId: string;
 
-  @Column({
-    type: 'enum',
-    enum: TransactionType,
-  })
-  type: TransactionType;
+  @ManyToOne(() => User)
+  @JoinColumn({ name: 'userId' })
+  user: User;
 
-  @Column({ name: 'amount', type: 'decimal', precision: 18, scale: 8 })
+  @Column({ type: 'decimal', precision: 18, scale: 8 })
   amount: number;
 
-  @Column({
-    type: 'enum',
-    enum: TransactionStatus,
-    default: TransactionStatus.PENDING,
-  })
+  @Column({ type: 'enum', enum: TransactionKind })
+  kind: TransactionKind;
+
+  @Column({ type: 'enum', enum: TransactionType, nullable: true })
+  type: TransactionType;
+
+  @Column({ type: 'enum', enum: TransactionStatus, default: TransactionStatus.PENDING })
   status: TransactionStatus;
 
-  @Column({ name: 'reference_id', nullable: true })
+  @Column({ nullable: true })
+  txHash: string;
+
+  @Column({ nullable: true })
+  reference: string;
+
+  @Column({ nullable: true })
   referenceId: string;
 
-  @Column({ name: 'related_entity_id', nullable: true })
+  @Column({ nullable: true })
   relatedEntityId: string;
 
   @Column({ type: 'json', nullable: true })
   metadata: Record<string, any>;
 
-  @ManyToOne(() => User, (user) => user.transactions)
-  user: User;
-
-  @Column({ name: 'is_withdrawable', type: 'boolean', default: true })
-  isWithdrawable: boolean;
+  @CreateDateColumn()
+  createdAt: Date;
 }

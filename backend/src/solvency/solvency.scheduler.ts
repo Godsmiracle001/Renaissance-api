@@ -50,7 +50,7 @@ export class SolvencyScheduler {
     }
   }
 
-  @Cron(CronExpression.EVERY_WEEK_ON_SUNDAY_AT_3AM)
+  @Cron('0 3 * * 0')
   async handleWeeklyArchival() {
     this.logger.log('Archiving old solvency proofs...');
     try {

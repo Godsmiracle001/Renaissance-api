@@ -1,18 +1,12 @@
 import { Column, Entity, OneToMany, Index } from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { Post } from '../../posts/entities/post.entity';
-import { Comment } from '../../comments/entities/comment.entity';
 import { Bet } from '../../bets/entities/bet.entity';
-import { Transaction } from '../../transactions/entities/transaction.entity';
 import { Prediction } from '../../predictions/entities/prediction.entity';
-import { WalletConnection } from '../../wallet/entities/wallet-connection.entity';
 
 export enum UserRole {
-  // Standard user roles
   USER = 'user',
   MODERATOR = 'moderator',
-
-  // Privileged contract action roles
   ADMIN = 'admin',
   BACKEND_EXECUTOR = 'backend_executor',
   ORACLE = 'oracle',
@@ -20,93 +14,65 @@ export enum UserRole {
 }
 
 export enum UserStatus {
-  ACTIVE = 'active',
-  INACTIVE = 'inactive',
-  SUSPENDED = 'suspended',
   PENDING = 'pending',
+  ACTIVE = 'active',
+  SUSPENDED = 'suspended',
+  BANNED = 'banned',
 }
 
 @Entity('users')
-@Index(['email'])
-@Index(['role'])
+@Index(['email'], { unique: true })
+@Index(['username'], { unique: true })
 @Index(['status'])
-@Index(['emailVerified'])
+@Index(['role'])
 export class User extends BaseEntity {
   @Column({ unique: true })
   email: string;
 
-  @Column()
+  @Column({ unique: true })
+  username: string;
+
+  @Column({ select: false })
   password: string;
 
-  @Column({ name: 'first_name', nullable: true })
+  @Column({ nullable: true })
   firstName: string;
 
-  @Column({ name: 'last_name', nullable: true })
-  lastName: string;
-
   @Column({ nullable: true })
-  username: string;
+  lastName: string;
 
   @Column({ nullable: true })
   avatar: string;
 
-  @Column({
-    type: 'enum',
-    enum: UserRole,
-    default: UserRole.USER,
-  })
+  @Column({ type: 'enum', enum: UserRole, default: UserRole.USER })
   role: UserRole;
 
-  @Column({
-    type: 'enum',
-    enum: UserStatus,
-    default: UserStatus.ACTIVE,
-  })
+  @Column({ type: 'enum', enum: UserStatus, default: UserStatus.PENDING })
   status: UserStatus;
 
   @Column({ nullable: true })
-  bio: string;
+  emailVerifiedAt: Date;
 
   @Column({ nullable: true })
-  website: string;
-
-  @Column({ nullable: true })
-  location: string;
-
-  @Column({ name: 'email_verified', default: false })
-  emailVerified: boolean;
-
-  @Column({ name: 'last_login_at', nullable: true })
   lastLoginAt: Date;
 
-  @Column({
-    name: 'wallet_balance',
-    type: 'decimal',
-    precision: 18,
-    scale: 8,
-    default: 0,
-  })
+  @Column({ nullable: true })
+  stellarAddress: string;
+
+  @Column({ type: 'decimal', precision: 18, scale: 8, default: 0 })
   walletBalance: number;
+
+  @Column({ type: 'json', nullable: true })
+  metadata: Record<string, any>;
 
   @OneToMany(() => Post, (post) => post.author)
   posts: Post[];
 
-  @OneToMany(() => Comment, (comment) => comment.author, { cascade: true })
-  comments: Comment[];
-
   @OneToMany(() => Bet, (bet) => bet.user, { cascade: true })
   bets: Bet[];
-
-  @OneToMany(() => Transaction, (transaction) => transaction.user)
-  transactions: Transaction[];
 
   @OneToMany(() => Prediction, (prediction) => prediction.user, {
     cascade: true,
   })
   predictions: Prediction[];
-
-  @OneToMany(() => WalletConnection, (walletConnection) => walletConnection.user, {
-    cascade: true,
-  })
-  walletConnections: WalletConnection[];
 }

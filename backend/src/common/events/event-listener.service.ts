@@ -872,12 +872,12 @@ export class EventListenerService implements OnModuleInit, OnModuleDestroy {
     }
 
     nftReward.userId = userId;
-    nftReward.tier = tier;
+    nftReward.tier = tier as any;
     nftReward.isMinted = true;
-    nftReward.mintTransactionHash = event.txHash || null;
+    nftReward.mintTransactionHash = event.txHash || '';
     nftReward.claimedAt = new Date();
-    nftReward.metadataUri = metadataUri || nftReward.metadataUri || null;
-    nftReward.spinGameId = spinGameId || nftReward.spinGameId || null;
+    nftReward.metadataUri = metadataUri || nftReward.metadataUri || '';
+    nftReward.spinGameId = spinGameId || nftReward.spinGameId || '';
 
     await manager.save(nftReward);
 

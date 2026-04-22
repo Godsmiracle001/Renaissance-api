@@ -356,7 +356,7 @@ export class LeaderboardGateway
   ): Promise<void> {
     try {
       const limit = filters?.limit || 100;
-      const orderBy = filters?.orderBy || 'netEarnings';
+      const orderBy = (filters?.orderBy || 'netEarnings') as 'totalBets' | 'winningStreak' | 'netEarnings' | 'bestPredictor' | 'roi';
 
       const topLeaderboard =
         await this.leaderboardAggregationService.getTopLeaderboard(

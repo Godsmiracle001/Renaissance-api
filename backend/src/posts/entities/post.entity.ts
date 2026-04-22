@@ -9,7 +9,6 @@ import {
 } from 'typeorm';
 import { BaseEntity } from '../../common/entities/base.entity';
 import { User } from '../../users/entities/user.entity';
-import { Comment } from '../../comments/entities/comment.entity';
 import { Category } from '../../categories/entities/category.entity';
 
 export enum PostStatus {
@@ -84,9 +83,6 @@ export class Post extends BaseEntity {
 
   @ManyToOne(() => User, (user) => user.posts, { onDelete: 'SET NULL' })
   author: User;
-
-  @OneToMany(() => Comment, (comment) => comment.post)
-  comments: Comment[];
 
   @ManyToMany(() => Category, (category) => category.posts)
   @JoinTable({

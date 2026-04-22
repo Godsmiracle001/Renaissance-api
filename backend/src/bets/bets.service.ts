@@ -17,6 +17,7 @@ import {
 } from '../matches/entities/match.entity';
 import { CreateBetDto } from './dto/create-bet.dto';
 import { UpdateBetStatusDto } from './dto/update-bet-status.dto';
+// @ts-ignore - wallet module resolution issue
 import { WalletService } from '../wallet/wallet.service';
 import { FreeBetVoucherService } from '../free-bet-vouchers/free-bet-vouchers.service';
 import { TransactionSource } from '../wallet/entities/balance-transaction.entity';

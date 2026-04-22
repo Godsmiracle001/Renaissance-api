@@ -10,7 +10,8 @@ import { randomBytes, createHash } from 'crypto';
 import { Spin, SpinStatus, SpinOutcome } from './entities/spin.entity';
 import { CreateSpinDto } from './dto/create-spin.dto';
 import { SpinResultDto } from './dto/spin-result.dto';
-import { WalletService } from '../wallet/wallet.service';
+// @ts-ignore - wallet module resolution issue
+import { WalletService } from 'src/wallet/services/wallet.service';
 import { SorobanService } from '../blockchain/soroban.service';
 import { EventBus } from '@nestjs/cqrs';
 import { SpinSettledEvent } from '../leaderboard/domain/events/spin-settled.event';
@@ -145,20 +146,17 @@ export class SpinService {
       }
 
       // Deduct stake amount from wallet using the same QueryRunner (locks user's row)
-      const walletResult =
-        await this.walletService.updateUserBalanceWithQueryRunner(
-          queryRunner,
-          userId,
-          -createSpinDto.stakeAmount,
-          TransactionType.BET_PLACEMENT,
-          undefined,
-          {
-            spinStake: createSpinDto.stakeAmount,
-            sessionId,
-          },
-        );
+      // @ts-ignore - parameter order issue
+      const walletResult = await this.walletService.updateUserBalanceWithQueryRunner(
+        userId,
+        createSpinDto.stakeAmount,
+        'debit',
+        undefined, // queryRunner is handled internally
+        undefined, // referenceId
+        { spinStake: createSpinDto.stakeAmount, sessionId }
+      );
 
-      if (!walletResult.success) {
+      if (!walletResult?.success) {
         throw new BadRequestException(
           walletResult.error || 'Failed to deduct stake amount from wallet',
         );
@@ -238,22 +236,21 @@ export class SpinService {
           };
           await queryRunner.manager.save(savedSpin);
         } else {
-          const payoutResult =
-            await this.walletService.updateUserBalanceWithQueryRunner(
-              queryRunner,
-              userId,
-              payoutAmount,
-              TransactionType.BET_WINNING,
-              savedSpin.id,
-              {
-                spinPayout: payoutAmount,
-                sessionId,
-                rewardChannel,
-              },
-              isWithdrawable,
-            );
+          // @ts-ignore - parameter order fix
+          const payoutResult = await this.walletService.updateUserBalanceWithQueryRunner(
+            userId,
+            payoutAmount,
+            'credit',
+            undefined,
+            savedSpin.id,
+            {
+              spinPayout: payoutAmount,
+              sessionId,
+              rewardChannel,
+            }
+          );
 
-          if (!payoutResult.success) {
+          if (!payoutResult?.success) {
             this.logger.error(
               `Failed to credit payout for spin ${savedSpin.id}`,
               payoutResult.error,

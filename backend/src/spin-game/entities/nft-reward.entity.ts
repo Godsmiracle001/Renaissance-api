@@ -1,58 +1,60 @@
-import { Entity, Column, ManyToOne, JoinColumn, Index, Unique } from 'typeorm';
-import { BaseEntity } from '../../common/entities/base.entity';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, ManyToOne, JoinColumn } from 'typeorm';
 import { User } from '../../users/entities/user.entity';
 
+export enum NFTRewardTier {
+  BRONZE = 'bronze',
+  SILVER = 'silver',
+  GOLD = 'gold',
+  PLATINUM = 'platinum',
+}
+
 export enum NFTTier {
-  COMMON = 'COMMON',
-  RARE = 'RARE',
-  EPIC = 'EPIC',
-  LEGENDARY = 'LEGENDARY',
+  COMMON = 'common',
+  RARE = 'rare',
+  EPIC = 'epic',
+  LEGENDARY = 'legendary',
+  BRONZE = 'bronze',
+  SILVER = 'silver',
+  GOLD = 'gold',
+  PLATINUM = 'platinum',
 }
 
 @Entity('nft_rewards')
-@Unique(['nftContractAddress', 'nftId'])
-export class NFTReward extends BaseEntity {
-  @Column({ name: 'user_id', type: 'varchar', length: 56 })
+export class NFTReward {
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column()
   userId: string;
 
   @ManyToOne(() => User)
-  @JoinColumn({ name: 'user_id' })
+  @JoinColumn({ name: 'userId' })
   user: User;
 
-  @Column({ name: 'nft_contract_address', type: 'varchar', length: 56 })
+  @Column()
   nftContractAddress: string;
 
-  @Column({ name: 'nft_id', type: 'varchar' })
+  @Column()
   nftId: string;
 
-  @Column({ name: 'metadata_uri', type: 'varchar', nullable: true })
-  metadataUri: string | null;
+  @Column({ type: 'enum', enum: NFTRewardTier })
+  tier: NFTRewardTier;
 
-  @Column({
-    type: 'enum',
-    enum: NFTTier,
-    default: NFTTier.COMMON,
-  })
-  tier: NFTTier;
-
-  @Column({ name: 'is_minted', type: 'boolean', default: false })
+  @Column({ default: false })
   isMinted: boolean;
 
-  @Column({ name: 'mint_transaction_hash', type: 'varchar', nullable: true })
-  mintTransactionHash: string | null;
+  @Column({ nullable: true })
+  mintTransactionHash: string;
 
-  @Column({ name: 'spin_game_id', type: 'varchar', nullable: true })
-  spinGameId: string | null;
+  @Column({ nullable: true })
+  claimedAt: Date;
 
-  @Column({ name: 'claimed_at', type: 'timestamp', nullable: true })
-  claimedAt: Date | null;
+  @Column({ nullable: true })
+  metadataUri: string;
 
-  // ...BaseEntity fields: id, createdAt, updatedAt, deletedAt
+  @Column({ nullable: true })
+  spinGameId: string;
 
-  @Column({ name: 'is_withdrawable', type: 'boolean', default: false })
-  isWithdrawable: boolean;
-
-  @Index()
-  @Column({ name: 'rarity_score', type: 'int', nullable: true })
-  rarityScore: number | null;
+  @CreateDateColumn()
+  createdAt: Date;
 }

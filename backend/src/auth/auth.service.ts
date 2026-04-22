@@ -38,7 +38,7 @@ export class AuthService {
 
     const accessToken = this.jwtService.sign(payload);
 
-    const { password, posts, comments, ...userWithoutSensitiveData } = user;
+    const { password, posts, ...userWithoutSensitiveData } = user;
 
     return {
       user: userWithoutSensitiveData,
@@ -72,7 +72,7 @@ export class AuthService {
 
     const accessToken = this.jwtService.sign(payload);
 
-    const { password, posts, comments, ...userWithoutSensitiveData } =
+    const { password, posts, ...userWithoutSensitiveData } =
       savedUser;
 
     return {
