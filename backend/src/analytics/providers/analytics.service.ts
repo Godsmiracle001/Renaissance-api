@@ -273,4 +273,143 @@ export class AnalyticsService {
       };
     }
   }
+
+  /**
+   * Get comprehensive dashboard metrics
+   * Includes DAU, MAU, bet volume, revenue, user growth
+   */
+  async getDashboardMetrics(dateRange: DateRangeDto) {
+    const cacheKey = `dashboard_metrics_${JSON.stringify(dateRange)}`;
+    const cached = await this.cacheManager.get(cacheKey);
+    if (cached) return cached;
+
+    try {
+      const startDate = new Date(dateRange.startDate || '2024-01-01');
+      const endDate = new Date(dateRange.endDate || new Date());
+
+      // Calculate DAU (Daily Active Users)
+      const dauResult = await this.userRepository
+        .createQueryBuilder('user')
+        .select('COUNT(DISTINCT user.id)', 'dau')
+        .where('user.lastLogin >= :startDate AND user.lastLogin <= :endDate', {
+          startDate: new Date(startDate.toDateString()),
+          endDate: new Date(new Date(startDate).setDate(startDate.getDate() + 1)),
+        })
+        .getRawOne();
+
+      // Calculate MAU (Monthly Active Users)
+      const mauResult = await this.userRepository
+        .createQueryBuilder('user')
+        .select('COUNT(DISTINCT user.id)', 'mau')
+        .where('user.lastLogin >= :monthStart', {
+          monthStart: new Date(startDate.getFullYear(), startDate.getMonth(), 1),
+        })
+        .getRawOne();
+
+      // Bet Volume
+      const betVolumeResult = await this.betRepository
+        .createQueryBuilder('bet')
+        .select('COUNT(bet.id)', 'totalBets')
+        .addSelect('SUM(bet.amount)', 'totalVolume')
+        .addSelect('AVG(bet.amount)', 'avgBetSize')
+        .where('bet.createdAt >= :startDate AND bet.createdAt <= :endDate', {
+          startDate,
+          endDate,
+        })
+        .getRawOne();
+
+      // Revenue Metrics
+      const [betRevenue, spinRevenue] = await Promise.all([
+        this.betRepository
+          .createQueryBuilder('bet')
+          .select('SUM(bet.amount)', 'betRevenue')
+          .addSelect('SUM(CASE WHEN bet.status = \'won\' THEN bet.potentialWin ELSE 0 END)', 'payouts')
+          .where('bet.createdAt >= :startDate AND bet.createdAt <= :endDate', {
+            startDate,
+            endDate,
+          })
+          .getRawOne(),
+        this.spinRepository
+          .createQueryBuilder('spin')
+          .select('SUM(spin.betAmount)', 'spinRevenue')
+          .addSelect('SUM(spin.winAmount)', 'spinPayouts')
+          .where('spin.createdAt >= :startDate AND spin.createdAt <= :endDate', {
+            startDate,
+            endDate,
+          })
+          .getRawOne(),
+      ]);
+
+      const totalRevenue = (betRevenue?.betRevenue || 0) + (spinRevenue?.spinRevenue || 0);
+      const totalPayouts = (betRevenue?.payouts || 0) + (spinRevenue?.spinPayouts || 0);
+      const netRevenue = totalRevenue - totalPayouts;
+
+      // User Growth
+      const newUserCount = await this.userRepository
+        .createQueryBuilder('user')
+        .select('COUNT(user.id)', 'newUsers')
+        .where('user.createdAt >= :startDate AND user.createdAt <= :endDate', {
+          startDate,
+          endDate,
+        })
+        .getRawOne();
+
+      // Previous period comparison for growth rate
+      const previousStartDate = new Date(startDate);
+      const previousEndDate = new Date(startDate);
+      const dateDiff = endDate.getTime() - startDate.getTime();
+      previousStartDate.setTime(previousStartDate.getTime() - dateDiff);
+
+      const previousUserCount = await this.userRepository
+        .createQueryBuilder('user')
+        .select('COUNT(user.id)', 'previousUsers')
+        .where('user.createdAt >= :previousStartDate AND user.createdAt < :previousEndDate', {
+          previousStartDate,
+          previousEndDate: startDate,
+        })
+        .getRawOne();
+
+      const userGrowthRate = previousUserCount?.previousUsers > 0
+        ? ((newUserCount?.newUsers || 0) - previousUserCount.previousUsers) / previousUserCount.previousUsers * 100
+        : 0;
+
+      const result = {
+        dau: dauResult?.dau || 0,
+        mau: mauResult?.mau || 0,
+        betVolume: {
+          totalBets: betVolumeResult?.totalBets || 0,
+          totalVolume: betVolumeResult?.totalVolume || 0,
+          avgBetSize: betVolumeResult?.avgBetSize || 0,
+        },
+        revenue: {
+          totalRevenue,
+          totalPayouts,
+          netRevenue,
+          betRevenue: betRevenue?.betRevenue || 0,
+          spinRevenue: spinRevenue?.spinRevenue || 0,
+        },
+        userGrowth: {
+          newUsers: newUserCount?.newUsers || 0,
+          growthRate: userGrowthRate,
+        },
+        dateRange: {
+          startDate,
+          endDate,
+        },
+      };
+
+      await this.cacheManager.set(cacheKey, result, 300);
+      return result;
+    } catch (error) {
+      this.logger.error(`Error calculating dashboard metrics: ${error.message}`);
+      return {
+        dau: 0,
+        mau: 0,
+        betVolume: { totalBets: 0, totalVolume: 0, avgBetSize: 0 },
+        revenue: { totalRevenue: 0, totalPayouts: 0, netRevenue: 0, betRevenue: 0, spinRevenue: 0 },
+        userGrowth: { newUsers: 0, growthRate: 0 },
+        dateRange: { startDate: new Date(), endDate: new Date() },
+      };
+    }
+  }
 }

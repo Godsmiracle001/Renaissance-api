@@ -98,4 +98,9 @@ export class AnalyticsController {
     const endDate = new Date(dateRange.endDate || new Date());
     return this.analyticsEventService.getPlatformMetrics(startDate, endDate);
   }
+
+  @Get('dashboard')
+  async getDashboardMetrics(@Query() dateRange: DateRangeDto) {
+    return this.analyticsService.getDashboardMetrics(dateRange);
+  }
 }
